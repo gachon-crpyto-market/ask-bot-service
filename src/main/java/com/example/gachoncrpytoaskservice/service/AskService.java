@@ -1,5 +1,6 @@
 package com.example.gachoncrpytoaskservice.service;
 
+import com.example.gachoncrpytoaskservice.dto.request.AskRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import java.util.Set;
 @Transactional
 @Service
 public class AskService {
+    private final AskFeignClient askFeignClient;
     private final StringRedisTemplate stringRedisTemplate;
 
     public int getCurrentAskPrice() {
@@ -18,10 +20,14 @@ public class AskService {
         return Integer.parseInt(currentAsktPriceString);
     }
 
+    public String sendBotBidPrice(AskRequestDto askRequestDto){
+        return askFeignClient.getAskFeignInfo(askRequestDto);
+    }
+
     private String getCurrentAskPriceString() {
         return getKeysByPattern("*").stream()
                 .min(String::compareTo)
-                .get();
+                .orElse("950");
     }
 
     private Set<String> getKeysByPattern(String pattern) {
